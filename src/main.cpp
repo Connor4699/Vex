@@ -130,7 +130,7 @@ void autonomous() {
 //    chassis->setState({0_in, 0_in, 0_deg});
 //    chassis->setMaxVelocity(150);
 //    chassis->moveDistance(2_ft);
-/////    chassis->waitUntilSettled();
+////    chassis->waitUntilSettled();
 //    chassis->turnAngle(45_deg);
 //    chassis->moveDistance(4_in);
 //    chassis->turnAngle(-45_deg);
