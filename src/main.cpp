@@ -9,9 +9,12 @@
 
 //MotorGroup left({13, 11});
 //MotorGroup right({-18, 20});
+const double liftkP = 0.001;
+const double liftkI = 0.0001;
+const double liftkD = 0.0001;
 
 MotorGroup left({1, 11});
-MotorGroup right({10, 20});
+MotorGroup right({-19, 20});
 std::shared_ptr<OdomChassisController> chassis =
     ChassisControllerBuilder()
         .withMotors(left, right) // left motor is 1, right motor is 2 (reversed)
@@ -37,15 +40,37 @@ std::shared_ptr<ChassisController> drive =
                 .withDimensions(AbstractMotor::gearset::green, {{4_in, 14.5_in}, imev5GreenTPR})
                 .build();
 
+std::shared_ptr<AsyncMotionProfileController> profileControllerf =
+    AsyncMotionProfileControllerBuilder()
+        .withLimits({
+    0.5, // Maximum linear velocity of the Chassis in m/s
+    1, // Maximum linear acceleration of the Chassis in m/s/s
+    5 // Maximum linear jerk of the Chassis in m/s/s/s
+        })
+        .withOutput(*chassis)
+        .buildMotionProfileController();
+
 std::shared_ptr<AsyncMotionProfileController> profileController =
     AsyncMotionProfileControllerBuilder()
         .withLimits({
-            0.25, // Maximum linear velocity of the Chassis in m/s
-            0.5, // Maximum linear acceleration of the Chassis in m/s/s
-            2.5 // Maximum linear jerk of the Chassis in m/s/s/s
+    0.25, // Maximum linear velocity of the Chassis in m/s
+    0.5, // Maximum linear acceleration of the Chassis in m/s/s
+    2.5 // Maximum linear jerk of the Chassis in m/s/s/s
         })
-        .withOutput(chassis)
+        .withOutput(*chassis)
         .buildMotionProfileController();
+
+std::shared_ptr<AsyncPositionController<double, double>> jawcontroller =
+    AsyncPosControllerBuilder()
+        .withMotor(12) // lift motor port 3
+//        .withGains({liftkP, liftkI, liftkD})
+        .build();
+
+std::shared_ptr<AsyncPositionController<double, double>> liftcontroller =
+    AsyncPosControllerBuilder()
+        .withMotor(17) // lift motor port 3
+//        .withGains({liftkP, liftkI, liftkD})
+        .build();
 
 void on_center_button() {
 	static bool pressed = false;
@@ -69,6 +94,8 @@ void initialize() {
     arm.setBrakeMode(AbstractMotor::brakeMode::hold);
     jaw.setBrakeMode(AbstractMotor::brakeMode::hold);
     tip.setBrakeMode(AbstractMotor::brakeMode::hold);
+    arm.setGearing(AbstractMotor::gearset::red);
+    jaw.setGearing(AbstractMotor::gearset::red);
     autonomous();
 
 //    lv_obj_align(myLabel, NULL, LV_ALIGN_LEFT_MID, 10, 0); //set the position to center
@@ -115,21 +142,101 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-    std::string h = move(360, 75);
-//    profileController->generatePath(
-//            {{0_in, 0_in, 0_deg}, {10_in, 0_in, 0_deg}, {24_in, -28_in, 0_deg}}, "B");;
-//    profileController->setTarget("B");
+//    std::string h = move(360, 75);
+    double gearing = (double)left.getGearing();
+    profileController->generatePath({{0_in, 0_in, 0_deg}, {12_in, 0_in, 0_deg}}, "A");
+    profileController->setTarget("A");
+    liftcontroller->setTarget(2000);
+    jawcontroller->setTarget(500);
+    profileController->waitUntilSettled();
+    liftcontroller->waitUntilSettled();
+    jawcontroller->waitUntilSettled();
+    liftcontroller->tarePosition();
+    profileController->setTarget("A", true);
+    liftcontroller->setTarget(-500);
+    jawcontroller->setTarget(-200);
+    profileController->waitUntilSettled();
+    pros::lcd::set_text(5, "hl");
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {34_in, 0_in, 0_deg}}, "A");
+//    profileController->setTarget("A");
+//    jawcontroller->setTarget(1000);
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, -32_in, 0_deg}}, "B");
 //    profileController->waitUntilSettled();
 //
+//    jawcontroller->setTarget(-1000);
+//    pros::delay(250);
+//    profileController->setTarget("B");
+//    liftcontroller->setTarget(2750);
+//    profileController->removePath("A");
+//    profileController->waitUntilSettled();
+//    profileController->removePath("B");
+//
+//    liftcontroller->setTarget(-100);
+//    pros::delay(250);
+//    jawcontroller->setTarget(1000);
+//    pros::delay(250);
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, 40_in, 45_deg}}, "C");
+//    profileController->setTarget("C", true);
+
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, 26_in, 0_deg}}, "A");
+//    profileController->setTarget("A");
+//    jawcontroller->setTarget(1000);
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {34_in, 0_in, 0_deg}}, "B");
+//    profileController->waitUntilSettled();
+//
+//    profileController->setTarget("B");
+//    jawcontroller->setTarget(-1000);
+//    pros::delay(1000);
+//    liftcontroller->setTarget(2750);
+//    profileController->removePath("A");
+//    profileController->waitUntilSettled();
+//    profileController->removePath("B");
+//
 //    profileController->generatePath({{0_in, 0_in, 0_deg}, {36_in, 0_in, 0_deg}}, "C");
+//    liftcontroller->setTarget(-400);
+//    jawcontroller->setTarget(1000);
+//    profileController->setTarget("C", true);
+//    liftcontroller->setTarget(-1900);
+
+
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {36_in, 0_in, 0_deg}}, "A");
+//    profileController->setTarget("A");
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, 28_in, 0_deg}}, "B");
+//    profileController->waitUntilSettled();
+//
+//    profileController->setTarget("B", true); // true means to use the path in reverse
+//    profileController->removePath("A");
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {36_in, 0_in, 0_deg}}, "C");
+//    profileController->waitUntilSettled();
+//
+//    profileController->setTarget("C");
+//    profileController->removePath("B");
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {24_in, 0_in, 0_deg}}, "D");
+//    profileController->waitUntilSettled();
+//
+//    profileController->setTarget("D",true); // true means to use the path in reverse
+//    profileController->removePath("C");
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {12_in, 0_in, 0_deg}}, "E");
+//    profileController->waitUntilSettled();
+//
+//    chassis->setMaxVelocity(gearing*.25); // set the turn to be slower for more accuracy
+//    chassis->turnAngle(-270_deg);
+//    chassis->setMaxVelocity(gearing); // set veolcity back to full cartride value
+//
+//    profileController->setTarget("E");
+//    profileController->waitUntilSettled();
+//    profileController->removePath("E");
+
+//    profileController->generatePath({{0_in, 0_in, 0_deg}, {24_in, 0_in, 0_deg}}, "C");
 //    profileController->waitUntilSettled();
 //
 //    profileController->setTarget("C");
 //    profileController->removePath("B");
 
 //    chassis->setState({0_in, 0_in, 0_deg});
-//    chassis->setMaxVelocity(150);
-//    chassis->moveDistance(2_ft);
+////    chassis->setMaxVelocity(150);
+////    chassis->moveDistance(24_in);
+//    chassis->driveToPoint({0_ft, 2_ft});
 ////    chassis->waitUntilSettled();
 //    chassis->turnAngle(45_deg);
 //    chassis->moveDistance(4_in);
