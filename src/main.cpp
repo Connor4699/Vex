@@ -144,39 +144,33 @@ void competition_initialize() {}
 void autonomous() {
 //    std::string h = move(360, 75);
     double gearing = (double)left.getGearing();
-    profileController->generatePath({{0_in, 0_in, 0_deg}, {12_in, 0_in, 0_deg}}, "A");
+    profileController->generatePath({{0_in, 0_in, 0_deg}, {34_in, 0_in, 0_deg}}, "A");
     profileController->setTarget("A");
-    liftcontroller->setTarget(2000);
     jawcontroller->setTarget(500);
+    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, -32_in, 0_deg}}, "B");
     profileController->waitUntilSettled();
-    liftcontroller->waitUntilSettled();
-    jawcontroller->waitUntilSettled();
-    liftcontroller->tarePosition();
-    profileController->setTarget("A", true);
-    liftcontroller->setTarget(-500);
-    jawcontroller->setTarget(-200);
+
+    jawcontroller->setTarget(100);
+    pros::delay(250);
+    profileController->setTarget("B");
+    liftcontroller->setTarget(2750);
+    profileController->removePath("A");
     profileController->waitUntilSettled();
-    pros::lcd::set_text(5, "hl");
-//    profileController->generatePath({{0_in, 0_in, 0_deg}, {34_in, 0_in, 0_deg}}, "A");
-//    profileController->setTarget("A");
-//    jawcontroller->setTarget(1000);
-//    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, -32_in, 0_deg}}, "B");
-//    profileController->waitUntilSettled();
-//
-//    jawcontroller->setTarget(-1000);
-//    pros::delay(250);
-//    profileController->setTarget("B");
-//    liftcontroller->setTarget(2750);
-//    profileController->removePath("A");
-//    profileController->waitUntilSettled();
-//    profileController->removePath("B");
-//
-//    liftcontroller->setTarget(-100);
-//    pros::delay(250);
-//    jawcontroller->setTarget(1000);
-//    pros::delay(250);
-//    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, 40_in, 45_deg}}, "C");
-//    profileController->setTarget("C", true);
+    profileController->removePath("B");
+
+    liftcontroller->setTarget(2650);
+    pros::delay(250);
+    jawcontroller->setTarget(500);
+    pros::delay(250);
+    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, -32_in, 180_deg}}, "C");
+    profileController->setTarget("C", true);
+    liftcontroller->setTarget(20);
+    profileController->waitUntilSettled();
+
+    pros::delay(250);
+    jawcontroller->setTarget(100);
+    profileController->setTarget("C");
+
 
 //    profileController->generatePath({{0_in, 0_in, 0_deg}, {32_in, 26_in, 0_deg}}, "A");
 //    profileController->setTarget("A");
